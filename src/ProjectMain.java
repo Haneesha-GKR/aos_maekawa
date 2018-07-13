@@ -35,30 +35,30 @@ public class ProjectMain implements Serializable  {
 	// Create all the output streams associated with each socket 
 	HashMap<Integer,ObjectOutputStream> oStream = new HashMap<Integer,ObjectOutputStream>();
 	// HashMap which stores ArrayList of messages recorded while the process is red for each channel
-	HashMap<Integer,ArrayList<ApplicationMsg>> channelStates;
+	//HashMap<Integer,ArrayList<ApplicationMsg>> channelStates;
 	// HashMap which stores all incoming channels and boolean received marker message
 	HashMap<Integer,Boolean> receivedMarker;
 	// HashMap which stores all state messages
-	HashMap<Integer,StateMsg> stateMessages;	
+	//HashMap<Integer,StateMsg> stateMessages;	
 	//Used to determine if state message has been received from all the processes in the system
 	boolean[] nodesInGraph;
 	//Every process stores its state(Vector,ChannelStates and its id) in this StateMsg Object
-	StateMsg myState;
+	//StateMsg myState;
 	//To hold output Snapshots
 	ArrayList<int[]> output = new ArrayList<int[]>();
 
 	//Re-initialize everything that is needed for Chandy Lamport protocol before restarting it
-	void initialize(ProjectMain mainObj){
-		mainObj.channelStates = new HashMap<Integer,ArrayList<ApplicationMsg>>();
-		mainObj.receivedMarker = new HashMap<Integer,Boolean>();
-		mainObj.stateMessages = new HashMap<Integer,StateMsg>();	
+	//void initialize(ProjectMain mainObj){
+		//mainObj.channelStates = new HashMap<Integer,ArrayList<ApplicationMsg>>();
+		//mainObj.receivedMarker = new HashMap<Integer,Boolean>();
+		//mainObj.stateMessages = new HashMap<Integer,StateMsg>();	
 
-		Set<Integer> keys = mainObj.channels.keySet();
+		//Set<Integer> keys = mainObj.channels.keySet();
 		//Initialize channelStates hashMap
-		for(Integer element : keys){
-			ArrayList<ApplicationMsg> arrList = new ArrayList<ApplicationMsg>();
-			mainObj.channelStates.put(element, arrList);
-		}
+		//for(Integer element : keys){
+			//ArrayList<ApplicationMsg> arrList = new ArrayList<ApplicationMsg>();
+			//mainObj.channelStates.put(element, arrList);
+		//}
 		//Initialize boolean hashmap receivedMarker to false
 		for(Integer e: mainObj.neighbors){
 			mainObj.receivedMarker.put(e,false);

@@ -7,9 +7,21 @@ public class Config {
 	private long MeanExecDelay;
 	private long NumReq;
 	
-	private ArrayList<Host> hosts;
+	public static  ArrayList<Host> hosts;
+//	public static boolean addHost( Host newhost ) {
+//	      hosts.add( newhost );
+//	      return true;
+//	   }
 	
 	private Node node;
+
+	public ArrayList<Host> getHosts() {
+		return hosts;
+	}
+
+	public void setHosts(ArrayList<Host> hosts) {
+		this.hosts = hosts;
+	}
 }
 
 class Host{
