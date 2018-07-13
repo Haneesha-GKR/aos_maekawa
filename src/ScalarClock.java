@@ -1,4 +1,7 @@
-public class ScalarClock {
+import java.io.Serializable;
+
+public class ScalarClock implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private long clock;
 
 	public long getClock() {
