@@ -1,16 +1,10 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
 
 public class ConfigParser {
-	//	public static ProjectMain readConfigFile(String name) throws IOException{
-	public static int count = 0,flag = 0;
-	public static	int MeanReqDelay,N,MeanExecDelay,NumReq;
-
-	public static void main(String[] args) throws IOException{
-		Integer nodeid = Integer.parseInt(args[0]);
-		String filename=args[1];
+	public static Config genConfig(int nodeid, String filename) throws IOException{
 		String line= null;
 
 		Config config=new Config(nodeid);
@@ -32,6 +26,7 @@ public class ConfigParser {
 
 				String segment;
 				if(line.contains("#")){
+					System.out.println(line);
 					String[] segments = line.split("#");
 					segment = segments[0];
 				}else {
@@ -48,26 +43,35 @@ public class ConfigParser {
 						config.setMeanReqDelay(Integer.parseInt(tokens[1]));
 						config.setMeanExecDelay(Integer.parseInt(tokens[2]));
 						config.setNumReq(Integer.parseInt(tokens[3]));
-					}else if(line_number < config.getN()+1) {
-//						Read into hosts
+					}else if(line_number < config.getN() + 2) {
 						String[] tokens = segment.split(" +");
 						Host host = new Host(tokens[1], Integer.parseInt(tokens[2]));
 						config.hosts.add(host);
-					}else if(line_number == 1 + config.getN() + 2) {
-//						Read my neighbors
+					}else if(line_number < 2*config.getN() + 2) {
+						HashSet<Integer> quorum = new HashSet<Integer>();
 						String[] tokens = segment.split(" +");
 						for (String token : tokens) {
-							Neighbor neighbor = new Neighbor(Integer.parseInt(token));
-							config.node.neighbors.add(neighbor);
+							int tok_num = Integer.parseInt(token);
+							quorum.add(tok_num);
 						}
+						
+						config.quorums.add(quorum);
+						
 					}
 				}
 			}
-			config.display();
+			config.genMemberships();
+//			config.display();
 			bufferedReader.close();
+			
+			return config;
 		}catch (Exception e) {
 			e.printStackTrace();
-		}  
+			System.exit(-1);
+		}
+//		This is a failure case. This should never happen
+		Config c = new Config(-1);
+		return c;  
 	}
 }
 

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 public class Config {
@@ -8,6 +9,8 @@ public class Config {
 	private long NumReq;
 	
 	public ArrayList<Host> hosts;
+	public ArrayList<HashSet<Integer>> quorums;
+	
 	public Node node;
 
 	public ArrayList<Host> getHosts() {
@@ -62,6 +65,7 @@ public class Config {
 		super();
 		this.hosts = new ArrayList<Host>();
 		this.node = new Node(nodeid);
+		this.quorums = new ArrayList<HashSet<Integer>>();
 	}
 	
 	public void display() {
@@ -77,9 +81,33 @@ public class Config {
 			System.out.println(String.format("%02d> %8s | %6d |", i++, host.getHostname(), host.getPort()) );
 		}
 		
+		System.out.println("---------------------QUORUMS---------------------");
+		for (HashSet<Integer> hi : quorums) {
+			for (Integer integer : hi) {
+				System.out.print(String.format("%d ", integer));
+			}
+			System.out.println();
+		}
+		
 		System.out.println("-------------------------------------------------");
 		node.display();
 		System.out.println("-------------------------------------------------");
+	}
+	
+	public void genMemberships() {
+		HashSet<Integer> neighbors_set = new HashSet<Integer>();
+		int iter = 0;
+		for (HashSet<Integer> quorum : quorums) {
+			if(iter!=getNode().getId() && quorum.contains(node.getId())){
+				neighbors_set.add(iter);
+			}
+			iter++;
+		}
+		
+		for (Integer integer : neighbors_set) {
+			Neighbor neighbor = new Neighbor(integer);
+			node.neighbors.add(neighbor);
+		}
 	}
 }
 
