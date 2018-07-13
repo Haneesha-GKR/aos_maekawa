@@ -83,7 +83,7 @@ public class ProjectMain implements Serializable  {
 		// Transfer the collection of nodes from ArrayList to hash map which has node id as key since  
 		// we need to get and node as value ,it returns <id,host,port> when queried with node Id.
 		for(int i=0;i<mainObj.nodes.size();i++){
-			mainObj.store.put(mainObj.nodes.get(i).nodeId, mainObj.nodes.get(i));
+			mainObj.store.put(mainObj.nodes.get(i).getNodeId(), mainObj.nodes.get(i));
 		}
 		// Get the port number on which this node should listen 
 		int serverPort = mainObj.nodes.get(mainObj.id).port;
