@@ -1,32 +1,47 @@
 import java.net.Socket;
 import java.util.ArrayList;
 
-// Object that will have <Identifier> <Hostname> <Port> read from config file stored
+/**
+ * Class Node:	Represents the current node/site identified by nodeId
+ * 				-
+ * 
+ * */
 public class Node {
-	private int nodeId;
-	private ArrayList<Neighbor> neighbors;
+	private int id;
+	public ArrayList<Neighbor> neighbors;
 	
-	public Node(int nodeId) {
-		this.setNodeId(nodeId);
-	}
-
-	public int getNodeId() {
-		return nodeId;
-	}
-
-	public void setNodeId(int nodeId) {
-		this.nodeId = nodeId;
+	public Node(int id) {
+		super();
+		
+		this.setId(id);
+		this.neighbors = new ArrayList<Neighbor>();
 	}
 	
 	public Neighbor getNeighborById(int id) {
 		for (Neighbor neighbor : neighbors) {
-			if(neighbor.getNodeId() == id) {
+			if(neighbor.getId() == id) {
 				return(neighbor);
 			}
 		}
 		
 		Neighbor blank = new Neighbor(-1);
 		return(blank);
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public void display() {
+		System.out.print("Neighbors: ");
+		for (Neighbor neighbor : neighbors) {
+			System.out.print(String.format("%d ", neighbor.getId()));
+		}
+		System.out.println();
 	}
 }
 
