@@ -28,13 +28,13 @@ public class ConfigParser {
 					if(line.contains("#")){
 						String[] input = line.split("#.*$");
 						String[] input1 = input[0].split("\\s+");
-						if(flag == 0 && input1.length == 6){
+						if(flag == 0 && input1.length == 4){
 							mySystem.numOfNodes = Integer.parseInt(input1[0]);
-							mySystem.minPerActive = Integer.parseInt(input1[1]);
-							mySystem.maxPerActive = Integer.parseInt(input1[2]);
-							mySystem.minSendDelay = Integer.parseInt(input1[3]);
-							mySystem.snapshotDelay = Integer.parseInt(input1[4]);
-							mySystem.maxNumber = Integer.parseInt(input1[5]);
+							mySystem.interreq_delay = Integer.parseInt(input1[1]);
+							mySystem.execution_time = Integer.parseInt(input1[2]);
+							mySystem.num_request = Integer.parseInt(input1[3]);
+							//mySystem.snapshotDelay = Integer.parseInt(input1[4]);
+							//mySystem.maxNumber = Integer.parseInt(input1[5]);
 							flag++;
 							mySystem.adjMatrix = new int[mySystem.numOfNodes][mySystem.numOfNodes];
 						}

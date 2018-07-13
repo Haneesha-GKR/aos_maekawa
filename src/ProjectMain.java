@@ -15,7 +15,7 @@ enum Color { RED,BLUE};
 public class ProjectMain implements Serializable  {
 	static String outputFileName;
 	int id;
-	int numOfNodes,minPerActive,maxPerActive,minSendDelay,snapshotDelay,maxNumber;
+	int numOfNodes,interreq_delay,execution_time,num_request;
 	int totalMessagesSent = 0;
 	boolean active=false;
 	int[][] adjMatrix;
