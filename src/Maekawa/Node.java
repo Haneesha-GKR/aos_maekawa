@@ -9,8 +9,9 @@ import java.util.ArrayList;
  * */
 public class Node {
 	private int id;
+	
 	protected ArrayList<Neighbor> neighbors;
-	protected ArrayList<Neighbor> quorumNeighbors;
+	public ArrayList<Neighbor> quorumNeighbors;
 	
 	public Node(int id) {
 		super();
@@ -60,5 +61,9 @@ public class Node {
 		for (Neighbor neighbor : neighbors) {
 			neighbor.sendRequest(clock);
 		}
+	}
+	
+	public ArrayList<Neighbor> getQuorumNeighbors(){
+		return this.quorumNeighbors;
 	}
 }

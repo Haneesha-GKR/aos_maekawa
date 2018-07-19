@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Maekawa.Config;
@@ -16,28 +17,34 @@ import Maekawa.Node;
 public class Service extends Thread{
 	static int RETRY_COUNT=20;
 	
-	public Config config;
-	public ScalarClock localClock;
+	protected Config config;
+	protected ScalarClock localClock;
 	
 	private ReentrantLock serviceLock;
 	private ReentrantLock applicationLock;	// Is application in critical section or not or not.
-	
-	
 	private ArrayList<NeighborMonitor> neighborMonitors;
-	public ArrayList<Message> requestMessageQueue;
+	
+	
+	protected ArrayList<Message> requestMessageQueue;
+	protected Neighbor currentLockedNeighbor;
+	
+	Semaphore quorumCountingSemaphore;
 	
 	
 	public Service(Config config) {
 		super();
 		
-		this.serviceLock = new ReentrantLock(true);
-		this.applicationLock = new ReentrantLock(true);
-		this.applicationLock.lock(); //Service unlocks application lock only if service layer is done
-		
 		this.config = config;
 		this.localClock = new ScalarClock();
 		
+		this.serviceLock = new ReentrantLock(true);
+		this.applicationLock = new ReentrantLock(true);
 		this.neighborMonitors = new ArrayList<NeighborMonitor>();
+		this.applicationLock.lock(); //Service unlocks application lock only if service layer is done
+		
+		this.requestMessageQueue = new ArrayList<Message>();
+		this.quorumCountingSemaphore = new Semaphore(0); 
+
 		this.setup();
 		run();
 	}
@@ -117,8 +124,20 @@ public class Service extends Thread{
 	}
 	
 	private void lockQuorum() {
-		// TODO Auto-generated method stub
+		for (Neighbor neighbor : this.config.getNode().getQuorumNeighbors()) {
+			try {
+				neighbor.sendRequest(this.localClock);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
 		
+		try {
+			this.quorumCountingSemaphore.acquire(config.getNode().getQuorumNeighbors().size());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void csLeave() {
@@ -128,8 +147,14 @@ public class Service extends Thread{
 	}
 	
 	private void unLockQuorum() {
-		// TODO Auto-generated method stub
-		
+		for (Neighbor neighbor : this.config.getNode().getQuorumNeighbors()) {
+			try {
+				neighbor.sendRelease(this.localClock);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
 	}
 
 	private void handleRequestMessage(RequestMessage message) {
@@ -137,7 +162,7 @@ public class Service extends Thread{
 	}
 	
 	private void handleLockedMessage(LockedMessage message) {
-		
+		this.quorumCountingSemaphore.release();
 	}
 	
 	private void handleFailedMessage(FailedMessage message) {

@@ -49,5 +49,12 @@ public class Neighbor extends Node {
 	public void sendRequest(ScalarClock clock) throws IOException {
 		RequestMessage message = new RequestMessage(clock);
 		objectOutputStream.writeObject(message);
+		objectOutputStream.flush();
+	}
+
+	public void sendRelease(ScalarClock clock) throws IOException {
+		ReleaseMessage message = new ReleaseMessage(clock);
+		objectOutputStream.writeObject(message);
+		objectOutputStream.flush();
 	}
 }

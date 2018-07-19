@@ -1,7 +1,7 @@
 package Maekawa;
 
 public class ApplicationMessage extends Message {
-	private static final long serialVersionUID = 0xaaaa0006L;
+	private static final long serialVersionUID = 0xaaaa0007L;
 	
 	private String data;
 	
