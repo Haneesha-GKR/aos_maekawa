@@ -95,7 +95,7 @@ public class Config {
 		System.out.println("-------------------------------------------------");
 	}
 	
-	public void genMemberships() {
+	public void genMembershipAndQuorum() {
 		HashSet<Integer> neighbors_set = new HashSet<Integer>();
 		int iter = 0;
 		for (HashSet<Integer> quorum : quorums) {
@@ -107,7 +107,12 @@ public class Config {
 		
 		for (Integer integer : neighbors_set) {
 			Neighbor neighbor = new Neighbor(integer);
+//			Neighbors can either be quorum nodes or member nodes
 			node.neighbors.add(neighbor);
+//			If the original quorum of the node contains this neighbor - add the same to node's quorum
+			if(quorums.get(getNode().getId()).contains(integer)) {
+				node.quorumNeighbors.add(neighbor);
+			}
 		}
 	}
 }

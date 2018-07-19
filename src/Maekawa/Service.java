@@ -39,6 +39,7 @@ public class Service extends Thread{
 		
 		this.neighborMonitors = new ArrayList<NeighborMonitor>();
 		this.setup();
+		run();
 	}
 	
 	@Override
