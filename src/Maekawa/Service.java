@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Maekawa.Config;
@@ -26,6 +27,8 @@ public class Service extends Thread{
 	private ArrayList<NeighborMonitor> neighborMonitors;
 	public ArrayList<Message> requestMessageQueue;
 	
+	Semaphore quorumCountingSemaphore;
+	
 	
 	public Service(Config config) {
 		super();
@@ -38,6 +41,8 @@ public class Service extends Thread{
 		this.localClock = new ScalarClock();
 		
 		this.neighborMonitors = new ArrayList<NeighborMonitor>();
+		this.quorumCountingSemaphore = new Semaphore(0);
+
 		this.setup();
 		run();
 	}
@@ -117,8 +122,20 @@ public class Service extends Thread{
 	}
 	
 	private void lockQuorum() {
-		// TODO Auto-generated method stub
+		for (Neighbor neighbor : this.config.getNode().getNeighbors()) {
+			try {
+				neighbor.sendRequest(this.localClock);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
 		
+		try {
+			this.quorumCountingSemaphore.acquire(config.getNode().getQuorumNeighbors().size());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void csLeave() {
@@ -137,7 +154,7 @@ public class Service extends Thread{
 	}
 	
 	private void handleLockedMessage(LockedMessage message) {
-		
+		this.quorumCountingSemaphore.release();
 	}
 	
 	private void handleFailedMessage(FailedMessage message) {
