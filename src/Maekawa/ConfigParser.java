@@ -64,7 +64,7 @@ public class ConfigParser {
 					}
 				}
 			}
-			config.genMemberships();
+			config.genMembershipAndQuorum();
 //			config.display();
 			bufferedReader.close();
 			

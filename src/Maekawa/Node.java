@@ -9,13 +9,15 @@ import java.util.ArrayList;
  * */
 public class Node {
 	private int id;
-	public ArrayList<Neighbor> neighbors;
+	protected ArrayList<Neighbor> neighbors;
+	protected ArrayList<Neighbor> quorumNeighbors;
 	
 	public Node(int id) {
 		super();
 		
 		this.setId(id);
 		this.neighbors = new ArrayList<Neighbor>();
+		this.quorumNeighbors = new ArrayList<Neighbor>();
 	}
 	
 	public Neighbor getNeighborById(int id) {
@@ -40,6 +42,11 @@ public class Node {
 	public void display() {
 		System.out.print("Neighbors: ");
 		for (Neighbor neighbor : neighbors) {
+			System.out.print(String.format("%d ", neighbor.getId()));
+		}
+		System.out.println();
+		System.out.print("Quorum: ");
+		for (Neighbor neighbor : quorumNeighbors) {
 			System.out.print(String.format("%d ", neighbor.getId()));
 		}
 		System.out.println();
