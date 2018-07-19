@@ -1,8 +1,12 @@
+package Maekawa;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 
+/**
+ * class ConfigParser
+ * */
 public class ConfigParser {
 	public static Config genConfig(int nodeid, String filename) throws IOException{
 		String line= null;
