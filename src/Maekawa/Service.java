@@ -5,8 +5,6 @@ import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -19,16 +17,27 @@ public class Service extends Thread{
 	static int RETRY_COUNT=20;
 	
 	public Config config;
-	
-	protected ReentrantLock serviceLock;
 	public ScalarClock localClock;
+	
+	private ReentrantLock serviceLock;
+	private ReentrantLock applicationLock;	// Is application in critical section or not or not.
+	
+	
+	private ArrayList<NeighborMonitor> neighborMonitors;
 	public ArrayList<Message> requestMessageQueue;
+	
 	
 	public Service(Config config) {
 		super();
-		this.serviceLock = new ReentrantLock();
+		
+		this.serviceLock = new ReentrantLock(true);
+		this.applicationLock = new ReentrantLock(true);
+		this.applicationLock.lock(); //Service unlocks application lock only if service layer is done
+		
 		this.config = config;
 		this.localClock = new ScalarClock();
+		
+		this.neighborMonitors = new ArrayList<NeighborMonitor>();
 		this.setup();
 	}
 	
@@ -66,43 +75,87 @@ public class Service extends Thread{
 			
 			listener.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(-1);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		
 		for (NeighborConnectionSetupHandler nch : NCHList) {
 			try {
 				nch.join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.exit(-1);
 			}
 		}
+		
+		for (Neighbor neighbor : config.getNode().getNeighbors()) {
+			NeighborMonitor nm = new NeighborMonitor(neighbor);
+			nm.run();
+			this.neighborMonitors.add(nm);
+		}
 	}
 
 	public void csEnter() {
-		this.serviceLock.lock();
-		try {
-//			Send requests to my quorum
-			for (Neighbor neighbor : this.config.getNode().getNeighbors()) {
-				neighbor.sendRequest(this.localClock);
-			}
+		if(!this.applicationLock.isLocked()) {	// If the application is already running a critical section 
+												//- wait until it releases it
+												//- request the quorum
+												//- release lock after quorum agrees
 			
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			this.serviceLock.unlock();
+			this.applicationLock.lock(); 		// Wait for current CS to finish and acquire lock for current session 
+			lockQuorum();
+			return;
+
+		}else { // Else acquire a lock for application - contact quorum
+			this.applicationLock.lock();
+			lockQuorum();
+			return;
 		}
-//		This blocks until the service is done serving  
 	}
 	
-	public void csLeave() {
-//		Send release to my members
+	private void lockQuorum() {
+		// TODO Auto-generated method stub
+		
 	}
+
+	public void csLeave() {
+		unLockQuorum();
+		this.applicationLock.unlock();
+		return;
+	}
+	
+	private void unLockQuorum() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleRequestMessage(RequestMessage message) {
+		
+	}
+	
+	private void handleLockedMessage(LockedMessage message) {
+		
+	}
+	
+	private void handleFailedMessage(FailedMessage message) {
+		
+	}
+	
+	private void handleInquireMessage(InquireMessage message) {
+		
+	}
+	
+	private void handleRelinquishMessage(RelinquishMessage message) {
+		
+	}
+	
+	private void handleApplicationMessage(ApplicationMessage message) {
+		
+	}
+	
+	
 	
 	/**************************************************/
 
@@ -130,7 +183,7 @@ public class Service extends Thread{
 					successFlag = true;
 
 //					Sending nodeID to identify self after making connection
-					neighbor.getOut().writeObject(new Integer(config.getNode().getId()));
+					neighbor.getOutputObjectStream().writeObject(new Integer(config.getNode().getId()));
 	
 				} catch (IOException e) {
 					System.out.println(String.format("Retrying for %dth time", i+1));
@@ -160,8 +213,89 @@ public class Service extends Thread{
 			ObjectInputStream ois = neighbor.getInputObjectStream();
 			try {
 				Message message = (Message) ois.readObject();
+				Class<? extends Message> klass = message.getClass();
+				if(klass == RequestMessage.class) {
+					
+				}else if(klass == RequestMessage.class) {
+					RequestMessage requestMessage = (RequestMessage)message;
+					serviceLock.lock();
+					System.out.println(
+							String.format(
+									"NeighborMonitor for Neighbor %d received a Request message",
+									neighbor.getId()
+									)
+							);
+					handleRequestMessage(requestMessage);
+					serviceLock.unlock();
+				}else if(klass == LockedMessage.class) {
+					LockedMessage lockedMessage = (LockedMessage)message;
+					serviceLock.lock();
+					System.out.println(
+							String.format(
+									"NeighborMonitor for Neighbor %d received a Request message",
+									neighbor.getId()
+									)
+							);
+					handleLockedMessage(lockedMessage);
+					serviceLock.unlock();
+				}else if(klass == FailedMessage.class) {
+					FailedMessage failedMessage = (FailedMessage)message;
+					serviceLock.lock();
+					System.out.println(
+							String.format(
+									"NeighborMonitor for Neighbor %d received a Request message",
+									neighbor.getId()
+									)
+							);
+					handleFailedMessage(failedMessage);
+					serviceLock.unlock();
+				}else if(klass == RelinquishMessage.class) {
+					RelinquishMessage relinquishMessage = (RelinquishMessage)message;
+					serviceLock.lock();
+					System.out.println(
+							String.format(
+									"NeighborMonitor for Neighbor %d received a Request message",
+									neighbor.getId()
+									)
+							);
+					handleRelinquishMessage(relinquishMessage);
+					serviceLock.unlock();
+				}else if(klass == InquireMessage.class) {
+					InquireMessage inquireMessage = (InquireMessage)message;
+					serviceLock.lock();
+					System.out.println(
+							String.format(
+									"NeighborMonitor for Neighbor %d received a Request message",
+									neighbor.getId()
+									)
+							);
+					handleInquireMessage(inquireMessage);
+					serviceLock.unlock();
+				}else if(klass == ApplicationMessage.class) {
+					ApplicationMessage applicationMessage = (ApplicationMessage)message;
+					serviceLock.lock();
+					System.out.println(
+							String.format(
+									"NeighborMonitor for Neighbor %d received a Request message",
+									neighbor.getId()
+									)
+							);
+					handleApplicationMessage(applicationMessage);
+					serviceLock.unlock();
+				}else {
+					throw new ClassNotFoundException(
+							String.format(
+									"NeighborMonitor for Neighbor %d received an undefined message",
+									neighbor.getId()
+									)
+							);
+				}
+				
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
+			} finally {
+				serviceLock.unlock();
+				System.exit(-1);
 			}
 		}
 		

@@ -9,38 +9,28 @@ public class Neighbor extends Node {
 	private Socket OutgoingSocket;
 	private Socket IncomingSocket;
 	
-	private ObjectInputStream in;
-	private ObjectOutputStream out;
+	private ObjectInputStream objectInputStream;
+	private ObjectOutputStream objectOutputStream;
 	
 	public Neighbor(int nodeId) {
 		super(nodeId);
-		// TODO Auto-generated constructor stub
 	}
 
 	public ObjectInputStream getInputObjectStream() {
-		return in;
+		return objectInputStream;
 	}
 
-	public void setIn(ObjectInputStream objectInputStream) {
-		this.in = objectInputStream;
-//		ObjectInputStream is = new ObjectInputStream(connector.getInputStream());
-	}
-
-	public ObjectOutputStream getOut() {
-		return out;
-	}
-
-	public void setOut(ObjectOutputStream out) {
-		this.out = out;
-	}
-
-	public Socket getOutgoingSocket() {
-		return OutgoingSocket;
+	public ObjectOutputStream getOutputObjectStream() {
+		return objectOutputStream;
 	}
 
 	public void setOutgoingSocket(Socket outgoingSocket) throws IOException {
 		OutgoingSocket = outgoingSocket;
-		this.out = new ObjectOutputStream(outgoingSocket.getOutputStream());
+		try {
+			this.objectOutputStream = new ObjectOutputStream(OutgoingSocket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Socket getIncomingSocket() {
@@ -50,14 +40,14 @@ public class Neighbor extends Node {
 	public void setIncomingSocket(Socket incomingSocket) {
 		IncomingSocket = incomingSocket;
 		try {
-			this.in = new ObjectInputStream(IncomingSocket.getInputStream());;
+			this.objectInputStream = new ObjectInputStream(IncomingSocket.getInputStream());;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void sendRequest(ScalarClock clock) throws IOException {
-//		TODO: Working here
-//		this.out.writeObject(request);
+		RequestMessage message = new RequestMessage(clock);
+		objectOutputStream.writeObject(message);
 	}
 }
